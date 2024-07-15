@@ -1,6 +1,3 @@
-
-
-
 Private Sub btnGenererEDTEnseignants_Click()
  GenererEmploiDuTempsEnseignants
 End Sub
@@ -9,6 +6,10 @@ Private Sub btnGenererEDTGroupes_Click()
     GenererEmploiDuTempsGroupes
 End Sub
 
+
+Private Sub Label3_Click()
+
+End Sub
 
 ' Dans le module de code du UserForm
 
@@ -76,11 +77,11 @@ Private Sub InitialiserComboBoxEmploiDuTemps()
     ' Jours
     With cboEDTJour
         .Clear
-        .AddItem "الإثنين"
-        .AddItem "الثلاثاء"
-        .AddItem "الاربعاء"
-        .AddItem "الخميس"
-        .AddItem "الجمعة"
+        .AddItem "ÇáÅËäíä"
+        .AddItem "ÇáËáÇËÇÁ"
+        .AddItem "ÇáÇÑÈÚÇÁ"
+        .AddItem "ÇáÎãíÓ"
+        .AddItem "ÇáÌãÚÉ"
         
     End With
     
@@ -223,7 +224,7 @@ Private Sub SupprimerElement(nomFeuille As String, cbo As ComboBox)
     Set ws = ThisWorkbook.Worksheets(nomFeuille)
     ligneCible = Application.Match(cbo.Value, ws.Range("A:A"), 0)
     
-    If MsgBox("تtes-vous sûr de vouloir supprimer " & cbo.Value & " ? Cela supprimera également tous les emplois du temps associés.", vbYesNo) = vbYes Then
+    If MsgBox("Êtes-vous sûr de vouloir supprimer " & cbo.Value & " ? Cela supprimera également tous les emplois du temps associés.", vbYesNo) = vbYes Then
         ws.Rows(ligneCible).Delete
         RemplirComboBox nomFeuille, cbo
         MettreAJourEmploiDuTemps
@@ -289,7 +290,7 @@ Private Sub btnSupprimerEmploiDuTemps_Click()
     Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
     ligneCible = lstEmploiDuTemps.ListIndex + 2 ' +2 car la ligne 1 contient les en-têtes
     
-    If MsgBox("تtes-vous sûr de vouloir supprimer cet emploi du temps ?", vbYesNo) = vbYes Then
+    If MsgBox("Êtes-vous sûr de vouloir supprimer cet emploi du temps ?", vbYesNo) = vbYes Then
         ws.Rows(ligneCible).Delete
         MettreAJourEmploiDuTemps
         MsgBox "Emploi du temps supprimé avec succès !"
@@ -437,7 +438,7 @@ Private Sub GenererEmploiDuTempsGroupes()
     Dim heures As Variant
     
     ' Définir les jours et les heures
-    jours = Array("الإثنين", "الثلاثاء", "الاربعاء", "الخميس", "الجمعة")
+    jours = Array("ÇáÅËäíä", "ÇáËáÇËÇÁ", "ÇáÇÑÈÚÇÁ", "ÇáÎãíÓ", "ÇáÌãÚÉ")
     heures = Array("9<=8", "10<=9", "11<=10", "12<=11", "14<=13", "15<=14", "16<=15", "17<=16")
     
     Set wsEmploiDuTemps = ThisWorkbook.Worksheets("EmploiDuTemps")
@@ -486,13 +487,13 @@ Private Sub GenererEmploiDuTempsGroupes()
         finFormation = ThisWorkbook.Worksheets("Groupes").Cells(i, 3).Value
         specialite = ThisWorkbook.Worksheets("Groupes").Cells(i, 4).Value
         
-        wsGroupe.Cells(2, 1).Value = "بداية التكوين : " & debutFormation
-        wsGroupe.Cells(3, 1).Value = "نهاية التكوين : " & finFormation
-        wsGroupe.Cells(4, 1).Value = "الاختصاص : " & specialite
+        wsGroupe.Cells(3, 1).Value = "ÈÏÇíÉ ÇáÊßæíä : " & debutFormation
+        wsGroupe.Cells(4, 1).Value = "äåÇíÉ ÇáÊßæíä : " & finFormation
+        wsGroupe.Cells(5, 1).Value = "ÇáÇÎÊÕÇÕ : " & specialite
         
-        With wsGroupe.Range(wsGroupe.Cells(2, 1), wsGroupe.Cells(4, 1))
+        With wsGroupe.Range(wsGroupe.Cells(3, 1), wsGroupe.Cells(5, 1))
             .HorizontalAlignment = xlRight
-        .VerticalAlignment = xlTop
+        .VerticalAlignment = xlCenter
             .Font.Bold = True
             .Font.Size = 9
             .WrapText = True
