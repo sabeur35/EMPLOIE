@@ -1,0 +1,831 @@
+
+
+
+Private Sub btnGenererEDTEnseignants_Click()
+ GenererEmploiDuTempsEnseignants
+End Sub
+
+Private Sub btnGenererEDTGroupes_Click()
+    GenererEmploiDuTempsGroupes
+End Sub
+
+
+Private Sub Label3_Click()
+
+End Sub
+
+' Dans le module de code du UserForm
+
+Private Sub UserForm_Initialize()
+    ' Initialiser les onglets
+    InitialiserOnglets
+    
+    InitialiserOngletDetailsGroupes
+    
+    InitialiserOngletDetailsEnseignants
+    
+    
+    ' Remplir les ComboBox pour chaque onglet
+    RemplirComboBoxSalles
+    RemplirComboBoxEnseignants
+    RemplirComboBoxCours
+    RemplirComboBoxGroupes
+    
+    ' Initialiser les ComboBox pour l'emploi du temps
+    InitialiserComboBoxEmploiDuTemps
+    
+    ' Remplir la ListBox de l'emploi du temps
+    RemplirListBoxEmploiDuTemps
+End Sub
+
+Private Sub InitialiserOnglets()
+    ' Nommer les onglets
+    MultiPage1.Pages(0).Caption = "Salles"
+    MultiPage1.Pages(1).Caption = "Enseignants"
+    MultiPage1.Pages(2).Caption = "Cours"
+    MultiPage1.Pages(3).Caption = "Groupes"
+    MultiPage1.Pages(4).Caption = "Emploi du temps"
+End Sub
+
+' Fonctions pour remplir les ComboBox
+Private Sub RemplirComboBoxSalles()
+    RemplirComboBox "Salles", cboSalles
+End Sub
+
+Private Sub RemplirComboBoxEnseignants()
+    RemplirComboBox "Enseignants", cboEnseignants
+End Sub
+
+Private Sub RemplirComboBoxCours()
+    RemplirComboBox "Cours", cboCours
+End Sub
+
+Private Sub RemplirComboBoxGroupes()
+    RemplirComboBox "Groupes", cboGroupes
+End Sub
+
+Private Sub RemplirComboBox(nomFeuille As String, cbo As ComboBox)
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    
+    Set ws = ThisWorkbook.Worksheets(nomFeuille)
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    cbo.Clear
+    
+    For i = 2 To derniereLigne
+        cbo.AddItem ws.Cells(i, 1).Value
+    Next i
+End Sub
+
+Private Sub InitialiserComboBoxEmploiDuTemps()
+    ' Jours
+    With cboEDTJour
+        .Clear
+        .AddItem "ÇáÅËäíä"
+        .AddItem "ÇáËáÇËÇÁ"
+        .AddItem "ÇáÇÑÈÚÇÁ"
+        .AddItem "ÇáÎãíÓ"
+        .AddItem "ÇáÌãÚÉ"
+        
+    End With
+    
+    ' Heures
+    With cboEDTHeure
+        .Clear
+        .AddItem "9<=8"
+        .AddItem "10<=9"
+        .AddItem "11<=10"
+        .AddItem "12<=11"
+        .AddItem "14<=13"
+        .AddItem "15<=14"
+        .AddItem "16<=15"
+        .AddItem "17<=16"
+    End With
+    
+    ' Remplir les autres ComboBox
+    RemplirComboBox "Salles", cboEDTSalles
+    RemplirComboBox "Enseignants", cboEDTEnseignants
+    RemplirComboBox "Cours", cboEDTCours
+    RemplirComboBox "Groupes", cboEDTGroupes
+End Sub
+
+Private Sub RemplirListBoxEmploiDuTemps()
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    lstEmploiDuTemps.Clear
+    
+    For i = 2 To derniereLigne
+        lstEmploiDuTemps.AddItem ws.Cells(i, 1).Value & " - " & ws.Cells(i, 2).Value & " - " & ws.Cells(i, 3).Value & " - " & ws.Cells(i, 4).Value
+    Next i
+End Sub
+
+' Boutons pour chaque onglet
+Private Sub btnAjouterSalle_Click()
+    AjouterElement "Salles", cboSalles
+End Sub
+
+Private Sub btnModifierSalle_Click()
+    ModifierElement "Salles", cboSalles
+End Sub
+
+Private Sub btnSupprimerSalle_Click()
+    SupprimerElement "Salles", cboSalles
+End Sub
+
+Private Sub btnAjouterEnseignant_Click()
+    AjouterElement "Enseignants", cboEnseignants
+End Sub
+
+Private Sub btnModifierEnseignant_Click()
+    ModifierElement "Enseignants", cboEnseignants
+End Sub
+
+Private Sub btnSupprimerEnseignant_Click()
+    SupprimerElement "Enseignants", cboEnseignants
+End Sub
+
+Private Sub btnAjouterCours_Click()
+    AjouterElement "Cours", cboCours
+End Sub
+
+Private Sub btnModifierCours_Click()
+    ModifierElement "Cours", cboCours
+End Sub
+
+Private Sub btnSupprimerCours_Click()
+    SupprimerElement "Cours", cboCours
+End Sub
+
+Private Sub btnAjouterGroupe_Click()
+    AjouterElement "Groupes", cboGroupes
+End Sub
+
+Private Sub btnModifierGroupe_Click()
+    ModifierElement "Groupes", cboGroupes
+End Sub
+
+Private Sub btnSupprimerGroupe_Click()
+    SupprimerElement "Groupes", cboGroupes
+End Sub
+
+' Fonctions génériques pour ajouter, modifier et supprimer des éléments
+Private Sub AjouterElement(nomFeuille As String, cbo As ComboBox)
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    Dim nouvelElement As String
+    
+    nouvelElement = InputBox("Entrez le nouveau " & nomFeuille & " :")
+    If nouvelElement = "" Then Exit Sub
+    
+    Set ws = ThisWorkbook.Worksheets(nomFeuille)
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row + 1
+    
+    ws.Cells(derniereLigne, 1).Value = nouvelElement
+    
+    RemplirComboBox nomFeuille, cbo
+    MettreAJourEmploiDuTemps
+    MsgBox nomFeuille & " ajouté avec succès !"
+End Sub
+
+Private Sub ModifierElement(nomFeuille As String, cbo As ComboBox)
+    Dim ws As Worksheet
+    Dim ligneCible As Long
+    Dim ancienneValeur As String
+    Dim nouvelleValeur As String
+    
+    If cbo.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner un élément à modifier."
+        Exit Sub
+    End If
+    
+    Set ws = ThisWorkbook.Worksheets(nomFeuille)
+    ligneCible = Application.Match(cbo.Value, ws.Range("A:A"), 0)
+    
+    ancienneValeur = cbo.Value
+    nouvelleValeur = InputBox("Entrez le nouveau nom pour " & ancienneValeur & " :")
+    If nouvelleValeur = "" Then Exit Sub
+    
+    ws.Cells(ligneCible, 1).Value = nouvelleValeur
+    
+    RemplirComboBox nomFeuille, cbo
+    MettreAJourEmploiDuTemps
+    MsgBox nomFeuille & " modifié avec succès !"
+End Sub
+
+Private Sub SupprimerElement(nomFeuille As String, cbo As ComboBox)
+    Dim ws As Worksheet
+    Dim ligneCible As Long
+    
+    If cbo.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner un élément à supprimer."
+        Exit Sub
+    End If
+    
+    Set ws = ThisWorkbook.Worksheets(nomFeuille)
+    ligneCible = Application.Match(cbo.Value, ws.Range("A:A"), 0)
+    
+    If MsgBox("Êtes-vous sûr de vouloir supprimer " & cbo.Value & " ? Cela supprimera également tous les emplois du temps associés.", vbYesNo) = vbYes Then
+        ws.Rows(ligneCible).Delete
+        RemplirComboBox nomFeuille, cbo
+        MettreAJourEmploiDuTemps
+        MsgBox nomFeuille & " supprimé avec succès !"
+    End If
+End Sub
+
+' Gestion de l'emploi du temps
+Private Sub btnAjouterEmploiDuTemps_Click()
+    If VerifierConflit Then Exit Sub
+    
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row + 1
+    
+    ws.Cells(derniereLigne, 1).Value = cboEDTGroupes.Value
+    ws.Cells(derniereLigne, 2).Value = cboEDTCours.Value
+    ws.Cells(derniereLigne, 3).Value = cboEDTSalles.Value
+    ws.Cells(derniereLigne, 4).Value = cboEDTEnseignants.Value
+    ws.Cells(derniereLigne, 5).Value = cboEDTJour.Value
+    ws.Cells(derniereLigne, 6).Value = cboEDTHeure.Value
+    
+    MettreAJourEmploiDuTemps
+    MsgBox "Emploi du temps ajouté avec succès !"
+End Sub
+
+Private Sub btnModifierEmploiDuTemps_Click()
+    If lstEmploiDuTemps.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner un emploi du temps à modifier."
+        Exit Sub
+    End If
+    
+    If VerifierConflit Then Exit Sub
+    
+    Dim ws As Worksheet
+    Dim ligneCible As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    ligneCible = lstEmploiDuTemps.ListIndex + 2 ' +2 car la ligne 1 contient les en-têtes
+    
+    ws.Cells(ligneCible, 1).Value = cboEDTGroupes.Value
+    ws.Cells(ligneCible, 2).Value = cboEDTCours.Value
+    ws.Cells(ligneCible, 3).Value = cboEDTSalles.Value
+    ws.Cells(ligneCible, 4).Value = cboEDTEnseignants.Value
+    ws.Cells(ligneCible, 5).Value = cboEDTJour.Value
+    ws.Cells(ligneCible, 6).Value = cboEDTHeure.Value
+    
+    MettreAJourEmploiDuTemps
+    MsgBox "Emploi du temps modifié avec succès !"
+End Sub
+
+Private Sub btnSupprimerEmploiDuTemps_Click()
+    If lstEmploiDuTemps.ListIndex = -1 Then
+        MsgBox "Veuillez sélectionner un emploi du temps à supprimer."
+        Exit Sub
+    End If
+    
+    Dim ws As Worksheet
+    Dim ligneCible As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    ligneCible = lstEmploiDuTemps.ListIndex + 2 ' +2 car la ligne 1 contient les en-têtes
+    
+    If MsgBox("Êtes-vous sûr de vouloir supprimer cet emploi du temps ?", vbYesNo) = vbYes Then
+        ws.Rows(ligneCible).Delete
+        MettreAJourEmploiDuTemps
+        MsgBox "Emploi du temps supprimé avec succès !"
+    End If
+End Sub
+
+Private Function VerifierConflit() As Boolean
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    Dim i As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    For i = 2 To derniereLigne
+        If ws.Cells(i, 5).Value = cboEDTJour.Value And ws.Cells(i, 6).Value = cboEDTHeure.Value Then
+            ' Vérification du conflit de salle
+            If ws.Cells(i, 3).Value = cboEDTSalles.Value Then
+                MsgBox "Conflit : La salle " & cboEDTSalles.Value & " est déjà occupée à ce jour et cette heure.", vbExclamation
+                VerifierConflit = True
+                Exit Function
+            End If
+            
+            ' Vérification du conflit d'enseignant
+            If ws.Cells(i, 4).Value = cboEDTEnseignants.Value Then
+                MsgBox "Conflit : L'enseignant " & cboEDTEnseignants.Value & " est déjà occupé à ce jour et cette heure.", vbExclamation
+                VerifierConflit = True
+                Exit Function
+            End If
+            
+            ' Vérification du conflit de groupe
+            If ws.Cells(i, 1).Value = cboEDTGroupes.Value Then
+                MsgBox "Conflit : Le groupe " & cboEDTGroupes.Value & " a déjà un cours prévu à ce jour et cette heure.", vbExclamation
+                VerifierConflit = True
+                Exit Function
+            End If
+        End If
+    Next i
+    
+    VerifierConflit = False
+End Function
+
+Private Sub lstEmploiDuTemps_Click()
+    Dim ws As Worksheet
+    Dim ligneCible As Long
+    
+    Set ws = ThisWorkbook.Worksheets("EmploiDuTemps")
+    ligneCible = lstEmploiDuTemps.ListIndex + 2 ' +2 car la ligne 1 contient les en-têtes
+    
+    cboEDTGroupes.Value = ws.Cells(ligneCible, 1).Value
+    cboEDTCours.Value = ws.Cells(ligneCible, 2).Value
+    cboEDTSalles.Value = ws.Cells(ligneCible, 3).Value
+    cboEDTEnseignants.Value = ws.Cells(ligneCible, 4).Value
+    cboEDTJour.Value = ws.Cells(ligneCible, 5).Value
+    cboEDTHeure.Value = ws.Cells(ligneCible, 6).Value
+End Sub
+Private Sub MettreAJourEmploiDuTemps()
+    Dim ws As Worksheet
+    Dim wsEmploiDuTemps As Worksheet
+    Dim derniereLigne As Long
+    Dim i As Long
+    
+    Set wsEmploiDuTemps = ThisWorkbook.Worksheets("EmploiDuTemps")
+    derniereLigne = wsEmploiDuTemps.Cells(wsEmploiDuTemps.Rows.Count, "A").End(xlUp).row
+    
+    ' Mettre à jour les ComboBox de l'emploi du temps
+    RemplirComboBox "Salles", cboEDTSalles
+    RemplirComboBox "Enseignants", cboEDTEnseignants
+    RemplirComboBox "Cours", cboEDTCours
+    RemplirComboBox "Groupes", cboEDTGroupes
+    
+    ' Vérifier et mettre à jour chaque ligne de l'emploi du temps
+    For i = 2 To derniereLigne
+        ' Vérifier si le groupe existe toujours
+        If Not ElementExiste("Groupes", wsEmploiDuTemps.Cells(i, 1).Value) Then
+            wsEmploiDuTemps.Rows(i).Delete
+            i = i - 1
+            derniereLigne = derniereLigne - 1
+        ' Vérifier si le cours existe toujours
+        ElseIf Not ElementExiste("Cours", wsEmploiDuTemps.Cells(i, 2).Value) Then
+            wsEmploiDuTemps.Rows(i).Delete
+            i = i - 1
+            derniereLigne = derniereLigne - 1
+        ' Vérifier si la salle existe toujours
+        ElseIf Not ElementExiste("Salles", wsEmploiDuTemps.Cells(i, 3).Value) Then
+            wsEmploiDuTemps.Rows(i).Delete
+            i = i - 1
+            derniereLigne = derniereLigne - 1
+        ' Vérifier si l'enseignant existe toujours
+        ElseIf Not ElementExiste("Enseignants", wsEmploiDuTemps.Cells(i, 4).Value) Then
+            wsEmploiDuTemps.Rows(i).Delete
+            i = i - 1
+            derniereLigne = derniereLigne - 1
+        End If
+    Next i
+    
+    ' Mettre à jour la ListBox de l'emploi du temps
+    RemplirListBoxEmploiDuTemps
+    GenererEmploiDuTempsGroupes
+     
+End Sub
+
+
+Private Function ElementExiste(nomFeuille As String, valeur As String) As Boolean
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    Dim i As Long
+    
+    Set ws = ThisWorkbook.Worksheets(nomFeuille)
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    For i = 2 To derniereLigne
+        If ws.Cells(i, 1).Value = valeur Then
+            ElementExiste = True
+            Exit Function
+        End If
+    Next i
+    
+    ElementExiste = False
+End Function
+Private Sub MultiPage1_Change()
+    If MultiPage1.Value = 4 Then ' Page de l'emploi du temps
+        MettreAJourEmploiDuTemps
+    End If
+End Sub
+Private Sub btnFermerEmploiDuTemps_Click()
+    If MsgBox("Voulez-vous sauvegarder les modifications avant de fermer ?", vbYesNo + vbQuestion, "Confirmation") = vbYes Then
+        SauvegarderDonnees
+    End If
+    Unload Me
+End Sub
+
+Private Sub SauvegarderDonnees()
+    ' Ajoutez ici le code pour sauvegarder les données
+    ' Par exemple :
+    ThisWorkbook.Save
+    MsgBox "Données sauvegardées avec succès.", vbInformation
+End Sub
+Private Sub GenererEmploiDuTempsGroupes()
+    Dim wsEmploiDuTemps As Worksheet
+    Dim wsGroupe As Worksheet
+    Dim derniereLigne As Long
+    Dim i As Long, j As Long, k As Long
+    Dim jours As Variant
+    Dim heures As Variant
+    
+    ' Définir les jours et les heures
+    jours = Array("ÇáÅËäíä", "ÇáËáÇËÇÁ", "ÇáÇÑÈÚÇÁ", "ÇáÎãíÓ", "ÇáÌãÚÉ")
+    heures = Array("9<=8", "10<=9", "11<=10", "12<=11", "14<=13", "15<=14", "16<=15", "17<=16")
+    
+    Set wsEmploiDuTemps = ThisWorkbook.Worksheets("EmploiDuTemps")
+    derniereLigne = wsEmploiDuTemps.Cells(wsEmploiDuTemps.Rows.Count, "A").End(xlUp).row
+    
+    ' Supprimer les feuilles d'emploi du temps existantes
+    Application.DisplayAlerts = False
+    For i = ThisWorkbook.Worksheets.Count To 1 Step -1
+        If ThisWorkbook.Worksheets(i).Name Like "EDT_*" Then
+            ThisWorkbook.Worksheets(i).Delete
+        End If
+    Next i
+    Application.DisplayAlerts = True
+    
+    ' Créer une feuille pour chaque groupe
+    For i = 2 To ThisWorkbook.Worksheets("Groupes").Cells(ThisWorkbook.Worksheets("Groupes").Rows.Count, "A").End(xlUp).row
+        Dim nomGroupe As String
+        nomGroupe = ThisWorkbook.Worksheets("Groupes").Cells(i, 1).Value
+        Set wsGroupe = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
+        wsGroupe.Name = "EDT_" & nomGroupe
+        
+        ' Configurer l'affichage de droite à gauche
+        wsGroupe.DisplayRightToLeft = True
+        
+        ' Fusionner les cellules D4:G5 pour le nom du groupe
+        With wsGroupe.Range("D4:G5")
+            .Merge
+            .Value = "Groupe : " & nomGroupe
+            .Font.Bold = True
+            .Font.Size = 14
+            .HorizontalAlignment = xlCenter
+            .VerticalAlignment = xlCenter
+            .Borders.Weight = xlMedium
+            .Borders.Color = RGB(0, 0, 0)
+        End With
+        
+        ' Ajuster la hauteur des lignes pour le nom du groupe
+        wsGroupe.Rows("4:5").RowHeight = 25
+        
+        ' Ajouter les informations du groupe en haut à gauche
+        Dim debutFormation As String
+        Dim finFormation As String
+        Dim specialite As String
+        
+        debutFormation = ThisWorkbook.Worksheets("Groupes").Cells(i, 2).Value
+        finFormation = ThisWorkbook.Worksheets("Groupes").Cells(i, 3).Value
+        specialite = ThisWorkbook.Worksheets("Groupes").Cells(i, 4).Value
+        
+        wsGroupe.Cells(3, 1).Value = "ÈÏÇíÉ ÇáÊßæíä : " & debutFormation
+        wsGroupe.Cells(4, 1).Value = "äåÇíÉ ÇáÊßæíä : " & finFormation
+        wsGroupe.Cells(5, 1).Value = "ÇáÇÎÊÕÇÕ : " & specialite
+        
+        With wsGroupe.Range(wsGroupe.Cells(3, 1), wsGroupe.Cells(5, 1))
+            .HorizontalAlignment = xlRight
+        .VerticalAlignment = xlCenter
+            .Font.Bold = True
+            .Font.Size = 9
+            .WrapText = True
+        End With
+        
+        ' Ajuster la hauteur des lignes pour ces informations
+        wsGroupe.Rows("2:4").RowHeight = 24
+        
+        ' Créer l'en-tête du tableau
+        wsGroupe.Cells(7, 1).Value = "Jour / Heure"
+        For j = 1 To UBound(heures) + 1
+            wsGroupe.Cells(7, j + 1).Value = heures(j - 1)
+        Next j
+        
+        ' Ajouter les jours
+        For j = 1 To UBound(jours) + 1
+            wsGroupe.Cells(j + 7, 1).Value = jours(j - 1)
+        Next j
+        
+        ' Remplir le tableau avec les données
+        For j = 2 To derniereLigne
+            If wsEmploiDuTemps.Cells(j, 1).Value = nomGroupe Then
+                Dim jourIndex As Integer
+                Dim heureIndex As Integer
+                jourIndex = TrouverIndexJour(wsEmploiDuTemps.Cells(j, 5).Value, jours)
+                heureIndex = TrouverIndexHeure(wsEmploiDuTemps.Cells(j, 6).Value, heures)
+                
+                If jourIndex > 0 And heureIndex > 0 Then
+                    With wsGroupe.Cells(jourIndex + 7, heureIndex + 1)
+                        .Value = wsEmploiDuTemps.Cells(j, 2).Value & vbNewLine & _
+                                 wsEmploiDuTemps.Cells(j, 3).Value & vbNewLine & _
+                                 wsEmploiDuTemps.Cells(j, 4).Value
+                        
+                        ' Appliquer les couleurs
+                        .Characters(1, Len(wsEmploiDuTemps.Cells(j, 2).Value)).Font.Color = RGB(255, 0, 0) ' Cours en rouge
+                        .Characters(Len(wsEmploiDuTemps.Cells(j, 2).Value) + 2, Len(wsEmploiDuTemps.Cells(j, 3).Value)).Font.Color = RGB(0, 0, 255) ' Classe en bleu
+                        .Characters(Len(wsEmploiDuTemps.Cells(j, 2).Value) + Len(wsEmploiDuTemps.Cells(j, 3).Value) + 3).Font.Color = RGB(0, 128, 0) ' Enseignant en vert
+                    End With
+                End If
+            End If
+        Next j
+        
+        ' Formater le tableau
+        With wsGroupe.Range(wsGroupe.Cells(7, 1), wsGroupe.Cells(UBound(jours) + 8, UBound(heures) + 2))
+            .Borders.LineStyle = xlContinuous
+            .WrapText = True
+            .VerticalAlignment = xlCenter
+            .HorizontalAlignment = xlCenter
+        End With
+        
+        ' Appliquer les largeurs de colonnes et hauteurs de lignes spécifiées
+        wsGroupe.Columns(1).ColumnWidth = 16
+        wsGroupe.Range(wsGroupe.Cells(1, 2), wsGroupe.Cells(1, UBound(heures) + 2)).ColumnWidth = 17
+        wsGroupe.Rows(7).RowHeight = 17
+        wsGroupe.Range(wsGroupe.Cells(8, 1), wsGroupe.Cells(UBound(jours) + 8, 1)).RowHeight = 45
+        
+        ' Mettre en gras la première ligne et la première colonne
+        wsGroupe.Rows(7).Font.Bold = True
+        wsGroupe.Columns(1).Font.Bold = True
+        
+        ' Ajouter une double bordure au milieu du tableau
+        Dim middleColumnIndex As Integer
+        middleColumnIndex = Application.WorksheetFunction.Match("14<=13", heures, 0) + 1
+        
+        With wsGroupe.Range(wsGroupe.Cells(7, middleColumnIndex), wsGroupe.Cells(UBound(jours) + 8, middleColumnIndex)).Borders(xlEdgeLeft)
+            .LineStyle = xlDouble
+            .Weight = xlThick
+            .ColorIndex = xlAutomatic
+        End With
+        
+        ' Ajouter des hachures inclinées aux cellules vides
+        Dim cellRange As Range
+        For Each cellRange In wsGroupe.Range(wsGroupe.Cells(8, 2), wsGroupe.Cells(UBound(jours) + 8, UBound(heures) + 2))
+            If Len(Trim(cellRange.Value)) = 0 Then
+                With cellRange.Interior
+                    .Pattern = xlLightDown
+                    .PatternColorIndex = xlAutomatic
+                    .Color = RGB(240, 240, 240) ' Couleur gris clair pour les hachures
+                    .TintAndShade = 0
+                End With
+            End If
+        Next cellRange
+        
+        ' Créer un dictionnaire pour stocker les heures par enseignant et par cours
+        Dim dict As Object
+        Set dict = CreateObject("Scripting.Dictionary")
+        
+        ' Parcourir l'emploi du temps pour calculer les heures
+        Dim cell As Range
+        For Each cell In wsGroupe.Range(wsGroupe.Cells(8, 2), wsGroupe.Cells(UBound(jours) + 8, UBound(heures) + 2))
+            If Not IsEmpty(cell) Then
+                Dim cellContent As String
+                cellContent = cell.Value
+                
+                Dim coursEnseignant As Variant
+                coursEnseignant = Split(cellContent, vbNewLine)
+                
+                If UBound(coursEnseignant) >= 2 Then
+                    Dim cours As String
+                    Dim enseignant As String
+                    cours = coursEnseignant(0)
+                    enseignant = coursEnseignant(2)
+                    
+                    Dim key As String
+                    key = enseignant & "|" & cours
+                    
+                    If dict.Exists(key) Then
+                        dict(key) = dict(key) + 1
+                    Else
+                        dict.Add key, 1
+                    End If
+                End If
+            End If
+        Next cell
+        
+        ' Créer le tableau récapitulatif
+        Dim startRow As Long
+        startRow = wsGroupe.Cells(wsGroupe.Rows.Count, 1).End(xlUp).row + 2
+        
+        wsGroupe.Cells(startRow, 1).Value = "Récapitulatif des heures"
+        wsGroupe.Range(wsGroupe.Cells(startRow, 1), wsGroupe.Cells(startRow, 3)).Merge
+        With wsGroupe.Cells(startRow, 1)
+            .Font.Bold = True
+            .Font.Size = 12
+            .HorizontalAlignment = xlCenter
+        End With
+        
+        wsGroupe.Cells(startRow + 1, 1).Value = "Enseignant"
+        wsGroupe.Cells(startRow + 1, 2).Value = "Cours"
+        wsGroupe.Cells(startRow + 1, 3).Value = "Total Heures"
+        
+        With wsGroupe.Range(wsGroupe.Cells(startRow + 1, 1), wsGroupe.Cells(startRow + 1, 3))
+            .Font.Bold = True
+        End With
+        
+        ' Remplir le tableau récapitulatif
+        Dim row As Long
+        row = startRow + 2
+        
+        Dim dictKey As Variant
+        For Each dictKey In dict.Keys
+            Dim enseignantCours As Variant
+            enseignantCours = Split(dictKey, "|")
+            
+            wsGroupe.Cells(row, 1).Value = enseignantCours(0)
+            wsGroupe.Cells(row, 2).Value = enseignantCours(1)
+            wsGroupe.Cells(row, 3).Value = dict(dictKey)
+            
+            row = row + 1
+        Next dictKey
+        
+        ' Formater le tableau récapitulatif
+        With wsGroupe.Range(wsGroupe.Cells(startRow + 1, 1), wsGroupe.Cells(row - 1, 3))
+            .Borders.LineStyle = xlContinuous
+            .Font.Size = 10
+            .VerticalAlignment = xlCenter
+            .HorizontalAlignment = xlCenter
+        End With
+        
+    Next i
+    
+    MsgBox "Emplois du temps générés pour tous les groupes.", vbInformation
+End Sub
+Private Function TrouverIndexJour(jourRecherche As String, jours As Variant) As Integer
+    Dim i As Integer
+    For i = 0 To UBound(jours)
+        If StrComp(jourRecherche, CStr(jours(i)), vbTextCompare) = 0 Then
+            TrouverIndexJour = i + 1
+            Exit Function
+        End If
+    Next i
+    TrouverIndexJour = 0  ' Jour non trouvé
+End Function
+
+Private Function TrouverIndexHeure(heureRecherche As String, heures As Variant) As Integer
+    Dim i As Integer
+    For i = 0 To UBound(heures)
+        If StrComp(heureRecherche, CStr(heures(i)), vbTextCompare) = 0 Then
+            TrouverIndexHeure = i + 1
+            Exit Function
+        End If
+    Next i
+    TrouverIndexHeure = 0  ' Heure non trouvée
+End Function
+Private Sub InitialiserOngletDetailsGroupes()
+    ' Remplir la ComboBox avec les groupes existants
+    RemplirComboBoxDetailGroupe
+End Sub
+
+Private Sub RemplirComboBoxDetailGroupe()
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    
+    Set ws = ThisWorkbook.Worksheets("Groupes")
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    cboDetailGroupe.Clear
+    For i = 2 To derniereLigne
+        cboDetailGroupe.AddItem ws.Cells(i, 1).Value
+    Next i
+End Sub
+
+Private Sub cboDetailGroupe_Change()
+    ' Charger les détails du groupe sélectionné
+    ChargerDetailsGroupe
+End Sub
+
+Private Sub ChargerDetailsGroupe()
+    Dim ws As Worksheet
+    Dim groupe As String
+    Dim ligne As Long
+    
+    groupe = cboDetailGroupe.Value
+    If groupe = "" Then Exit Sub
+    
+    Set ws = ThisWorkbook.Worksheets("Groupes")
+    ligne = Application.Match(groupe, ws.Range("A:A"), 0)
+    
+    If Not IsError(ligne) Then
+        txtDebutFormation.Value = ws.Cells(ligne, 2).Value
+        txtFinFormation.Value = ws.Cells(ligne, 3).Value
+        txtSpecialite.Value = ws.Cells(ligne, 4).Value
+        txtPromotion.Value = ws.Cells(ligne, 5).Value
+    End If
+End Sub
+
+Private Sub btnEnregistrerDetails_Click()
+    ' Enregistrer les détails du groupe
+    EnregistrerDetailsGroupe
+End Sub
+
+Private Sub EnregistrerDetailsGroupe()
+    Dim ws As Worksheet
+    Dim groupe As String
+    Dim ligne As Long
+    
+    groupe = cboDetailGroupe.Value
+    If groupe = "" Then
+        MsgBox "Veuillez sélectionner un groupe.", vbExclamation
+        Exit Sub
+    End If
+    
+    Set ws = ThisWorkbook.Worksheets("Groupes")
+    ligne = Application.Match(groupe, ws.Range("A:A"), 0)
+    
+    If IsError(ligne) Then
+        ligne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row + 1
+        ws.Cells(ligne, 1).Value = groupe
+    End If
+    
+    ws.Cells(ligne, 2).Value = txtDebutFormation.Value
+    ws.Cells(ligne, 3).Value = txtFinFormation.Value
+    ws.Cells(ligne, 4).Value = txtSpecialite.Value
+    ws.Cells(ligne, 5).Value = txtPromotion.Value
+    
+    MsgBox "Détails du groupe enregistrés avec succès.", vbInformation
+    
+    ' Mettre à jour la ComboBox des groupes
+    RemplirComboBoxDetailGroupe
+End Sub
+Private Sub InitialiserOngletDetailsEnseignants()
+    ' Remplir la ComboBox avec les enseignants existants
+    RemplirComboBoxDetailEnseignant
+End Sub
+
+Private Sub RemplirComboBoxDetailEnseignant()
+    Dim ws As Worksheet
+    Dim derniereLigne As Long
+    
+    Set ws = ThisWorkbook.Worksheets("Enseignants")
+    derniereLigne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row
+    
+    cboDetailEnseignant.Clear
+    For i = 2 To derniereLigne
+        cboDetailEnseignant.AddItem ws.Cells(i, 1).Value
+    Next i
+End Sub
+
+Private Sub cboDetailEnseignant_Change()
+    ' Charger les détails de l'enseignant sélectionné
+    ChargerDetailsEnseignant
+End Sub
+
+Private Sub ChargerDetailsEnseignant()
+    Dim ws As Worksheet
+    Dim enseignant As String
+    Dim ligne As Long
+    
+    enseignant = cboDetailEnseignant.Value
+    If enseignant = "" Then Exit Sub
+    
+    Set ws = ThisWorkbook.Worksheets("Enseignants")
+    ligne = Application.Match(enseignant, ws.Range("A:A"), 0)
+    
+    If Not IsError(ligne) Then
+        txtHeuresTravailHebdo.Value = ws.Cells(ligne, 2).Value
+    End If
+End Sub
+
+Private Sub btnEnregistrerDetailsEnseignant_Click()
+    ' Enregistrer les détails de l'enseignant
+    EnregistrerDetailsEnseignant
+End Sub
+
+Private Sub EnregistrerDetailsEnseignant()
+    Dim ws As Worksheet
+    Dim enseignant As String
+    Dim ligne As Long
+    
+    enseignant = cboDetailEnseignant.Value
+    If enseignant = "" Then
+        MsgBox "Veuillez sélectionner un enseignant.", vbExclamation
+        Exit Sub
+    End If
+    
+    Set ws = ThisWorkbook.Worksheets("Enseignants")
+    ligne = Application.Match(enseignant, ws.Range("A:A"), 0)
+    
+    If IsError(ligne) Then
+        ligne = ws.Cells(ws.Rows.Count, "A").End(xlUp).row + 1
+        ws.Cells(ligne, 1).Value = enseignant
+    End If
+    
+    ws.Cells(ligne, 2).Value = txtHeuresTravailHebdo.Value
+    
+    MsgBox "Détails de l'enseignant enregistrés avec succès.", vbInformation
+    
+    ' Mettre à jour la ComboBox des enseignants
+    RemplirComboBoxDetailEnseignant
+End Sub
