@@ -1,0 +1,95 @@
+Sub GenererFichePresenceJourActuelPDF()
+    Dim wsEmploiDuTemps As Worksheet
+    Dim wsEnseignants As Worksheet
+    Dim wsPhases As Worksheet
+    Dim wbFichePresence As Workbook
+    Dim wsFichePresence As Worksheet
+    Dim jours As Variant
+    Dim heuresMatin As Variant
+    Dim heuresApresMidi As Variant
+    Dim enseignants As Collection
+    Dim dateActuelle As Date
+    Dim cheminBureau As String
+    Dim nomFichierPDF As String
+    
+    ' ... (le reste de vos déclarations de variables)
+    
+    Application.ScreenUpdating = False
+    Application.Calculation = xlCalculationManual
+    Application.EnableEvents = False
+    
+    ' Obtenir la date du jour
+    dateActuelle = Date
+    
+    ' Vérifier si la date actuelle est dans la plage de dates de la phase
+    Set wsPhases = ThisWorkbook.Worksheets("Phases")
+    dateDebut = CDate(wsPhases.Cells(2, 2).Value)
+    dateFin = CDate(wsPhases.Cells(2, 3).Value)
+    
+    If dateActuelle < dateDebut Or dateActuelle > dateFin Then
+        MsgBox "La date actuelle n'est pas dans la plage de dates de la phase.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Créer un nouveau classeur
+    Set wbFichePresence = Application.Workbooks.Add
+    
+    ' Créer une feuille pour le jour actuel
+    wbFichePresence.Worksheets(1).Name = Format(dateActuelle, "yyyy-mm-dd") & " " & WeekdayName(Weekday(dateActuelle))
+    Set wsFichePresence = wbFichePresence.Worksheets(1)
+    
+    ' Le reste de votre code pour générer la fiche de présence
+    ' ... (insérez ici le code de génération de la fiche de présence)
+    
+    ' Obtenir le chemin du bureau
+    cheminBureau = CreateObject("WScript.Shell").SpecialFolders("Desktop")
+    
+    ' Créer le nom du fichier PDF
+    nomFichierPDF = "Fiche_Presence_" & Format(dateActuelle, "yyyy-mm-dd") & ".pdf"
+    
+    ' Sauvegarder en PDF sur le bureau
+    wsFichePresence.ExportAsFixedFormat Type:=xlTypePDF, Filename:=cheminBureau & "\" & nomFichierPDF, Quality:=xlQualityStandard, IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+    
+    ' Fermer le classeur sans sauvegarder
+    wbFichePresence.Close SaveChanges:=False
+    
+    Application.ScreenUpdating = True
+    Application.Calculation = xlCalculationAutomatic
+    Application.EnableEvents = True
+    
+    MsgBox "La fiche de présence pour le " & Format(dateActuelle, "dd/mm/yyyy") & " a été sauvegardée sur le bureau au format PDF.", vbInformation
+End Sub
+
+Sub ExecuterGenerationPDFAutomatique()
+    ' Vérifier si c'est un jour de semaine (lundi à vendredi)
+    If Weekday(Date, vbMonday) <= 5 Then
+        GenererFichePresenceJourActuelPDF
+    End If
+End Sub
+-------------------------------------------------------------------------------------------------
+Ce code fait les choses suivantes :
+
+Il génère la fiche de présence pour le jour actuel.
+Au lieu d'imprimer, il exporte la feuille au format PDF.
+Le fichier PDF est sauvegardé sur le bureau avec un nom incluant la date du jour.
+Un message de confirmation est affiché à la fin du processus.
+
+Pour configurer l'exécution automatique :
+
+Enregistrez ces macros dans un classeur Excel que vous garderez ouvert ou dans votre classeur de macros personnelles (Personal.xlsb).
+Utilisez le Planificateur de tâches de Windows pour créer une tâche qui s'exécute chaque jour à 7h45 :
+
+Action : Démarrer un programme
+Programme : Le chemin vers EXCEL.EXE
+Arguments : /e "NomDuClasseur.xlsm" "ExecuterGenerationPDFAutomatique"
+
+
+
+Assurez-vous que :
+
+L'ordinateur est allumé à 7h45 chaque jour.
+Excel est installé sur l'ordinateur.
+Le classeur contenant ces macros est accessible.
+L'utilisateur qui exécute la tâche a les droits nécessaires pour écrire sur le bureau.
+
+Cette solution créera automatiquement un fichier PDF de la fiche de présence sur le bureau chaque jour de semaine à 7h45, à condition que la date soit dans la plage définie dans l'onglet "Phases".
